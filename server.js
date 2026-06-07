@@ -153,11 +153,12 @@ async function handler(req, res) {
   // ── Pipeline stats ───────────────────────────────────────────────────────────
   if (req.method === 'GET' && p === '/api/stats') {
     try {
-      const [records, health] = await Promise.all([
+      const [rawRecords, health] = await Promise.all([
         agentFetch('/api/crm'),
         agentFetch('/api/health')
       ]);
-      const enriched = enrichRecords(records);
+      // enrichRecords merges local pipeline stages — critical for accurate stats
+      const enriched = enrichRecords(rawRecords);
       const stages = ['New Lead','Contacted','In Progress','Closed Won','Closed Lost'];
       const byStage = {};
       stages.forEach(s => byStage[s] = enriched.filter(r => r.stage === s).length);
