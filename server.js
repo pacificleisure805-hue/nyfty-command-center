@@ -27,6 +27,8 @@ let PIPELINE_FILE  = path.join(__dirname, 'data', 'pipeline.json');
   }
   NOTES_FILE    = path.join(dir, 'notes.json');
   PIPELINE_FILE = path.join(dir, 'pipeline.json');
+  // Ensure data directory exists (no persistent disk on Render free tier)
+  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
   if (!fs.existsSync(NOTES_FILE))    fs.writeFileSync(NOTES_FILE,    '{}');
   if (!fs.existsSync(PIPELINE_FILE)) fs.writeFileSync(PIPELINE_FILE, '{}');
   console.log('Data dir:', dir);
