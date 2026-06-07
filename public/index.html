@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NYFTY Lending — Command Center</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#f8f9fc; --surface:#ffffff; --surface-2:#f1f4f9; --surface-3:#e8edf5;
+  --border:#e2e8f0; --border-strong:#cbd5e1;
+  --text-1:#0f172a; --text-2:#475569; --text-3:#94a3b8;
+  --brand:#00a86b; --brand-hover:#008f5a; --brand-pale:#e6f7f1; --brand-border:#99ddc4; --brand-dark:#005c3a;
+  --red:#dc2626; --red-pale:#fee2e2;
+  --orange:#ea580c; --orange-pale:#ffedd5;
+  --gold:#d97706; --gold-pale:#fef3c7;
+  --blue:#1d4ed8; --blue-pale:#dbeafe;
+  --purple:#7c3aed; --purple-pale:#ede9fe;
+}
+html.dark {
+  --bg:#090e1a; --surface:#111827; --surface-2:#1a2235; --surface-3:#1e2d45;
+  --border:#1e2d45; --border-strong:#2d3f5e;
+  --text-1:#e2e8f0; --text-2:#94a3b8; --text-3:#475569;
+  --brand:#00d68a; --brand-hover:#00f0a0; --brand-pale:rgba(0,214,138,.1); --brand-border:rgba(0,214,138,.3); --brand-dark:#00d68a;
+  --red:#f87171; --red-pale:#450a0a;
+  --orange:#fb923c; --orange-pale:#431407;
+  --gold:#fbbf24; --gold-pale:#451a03;
+  --blue:#3b82f6; --blue-pale:#1e3a5f;
+  --purple:#a78bfa; --purple-pale:#2e1065;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text-1);font-family:'Inter',system-ui,sans-serif;font-size:13px;min-height:100vh;display:flex;flex-direction:column;}
+
+/* ── LOGIN ── */
+.login-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;background:var(--bg);}
+.login-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:36px 32px;width:340px;text-align:center;box-shadow:0 4px 24px rgba(0,0,0,.08);}
+.login-logo{width:52px;height:52px;background:var(--brand);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;margin:0 auto 16px;}
+.login-title{font-size:18px;font-weight:700;color:var(--text-1);margin-bottom:4px;}
+.login-sub{font-size:12px;color:var(--text-3);margin-bottom:24px;}
+.login-input{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;background:var(--surface-2);color:var(--text-1);outline:none;margin-bottom:12px;font-family:inherit;}
+.login-input:focus{border-color:var(--brand);}
+.login-btn{width:100%;padding:10px;background:var(--brand);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;}
+.login-btn:hover{background:var(--brand-hover);}
+.login-err{font-size:12px;color:var(--red);margin-top:8px;}
+
+/* ── HEADER ── */
+.header{background:#0a1628;padding:11px 20px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.brand{display:flex;align-items:center;gap:10px;}
+.brand-icon{width:34px;height:34px;background:var(--brand);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:17px;}
+.brand-name{font-size:15px;font-weight:700;color:#fff;letter-spacing:-.3px;}
+.brand-sub{font-size:11px;color:#64748b;margin-top:1px;}
+.header-right{display:flex;align-items:center;gap:12px;}
+.live-badge{background:#052e16;border:1px solid var(--brand);color:var(--brand);padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;display:flex;align-items:center;gap:5px;}
+.live-dot{width:6px;height:6px;background:var(--brand);border-radius:50%;animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.header-time{font-size:11px;color:#64748b;}
+.theme-toggle{width:36px;height:20px;background:#334155;border-radius:10px;border:none;cursor:pointer;position:relative;transition:background .2s;padding:0;flex-shrink:0;}
+.theme-toggle::after{content:'';position:absolute;top:2px;left:2px;width:16px;height:16px;background:#fff;border-radius:50%;transition:transform .2s;}
+html.dark .theme-toggle{background:var(--brand);}
+html.dark .theme-toggle::after{transform:translateX(16px);}
+
+/* ── LAYOUT ── */
+.app{display:flex;flex:1;overflow:hidden;height:calc(100vh - 56px);}
+
+/* ── SIDEBAR ── */
+.sidebar{width:200px;background:#0a1628;border-right:1px solid #1e293b;display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto;}
+.sidebar-section{padding:16px 12px 6px;font-size:10px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.08em;}
+.nav-item{display:flex;align-items:center;gap:9px;padding:9px 14px;cursor:pointer;border-radius:6px;margin:1px 8px;color:#94a3b8;font-size:13px;font-weight:500;transition:all .15s;}
+.nav-item:hover{background:#1e293b;color:#e2e8f0;}
+.nav-item.active{background:linear-gradient(135deg,#004d30,#00a86b);color:#fff;}
+.nav-icon{font-size:15px;flex-shrink:0;}
+.nav-badge{margin-left:auto;background:var(--red);color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:10px;min-width:18px;text-align:center;}
+.nav-badge.green{background:var(--brand);}
+.sidebar-divider{height:1px;background:#1e293b;margin:8px 12px;}
+.sidebar-agent{padding:12px 14px;margin:8px;background:#0f2040;border-radius:8px;border:1px solid #1e3a5f;}
+.sidebar-agent-label{font-size:10px;color:#475569;font-weight:600;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;}
+.sidebar-agent-url{font-size:10px;color:var(--brand);word-break:break-all;line-height:1.4;}
+
+/* ── MAIN ── */
+.main{flex:1;overflow-y:auto;padding:20px;}
+.module{display:none;}
+.module.active{display:block;}
+.page-header{margin-bottom:18px;}
+.page-title{font-size:20px;font-weight:700;color:var(--text-1);}
+.page-sub{font-size:12px;color:var(--text-3);margin-top:3px;}
+
+/* ── STAT CARDS ── */
+.stat-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:20px;}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px;}
+.stat-label{font-size:11px;color:var(--text-3);font-weight:500;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;}
+.stat-value{font-size:26px;font-weight:700;color:var(--text-1);line-height:1;}
+.stat-sub{font-size:11px;color:var(--text-3);margin-top:4px;}
+.stat-card.highlight{border-color:var(--brand);background:var(--brand-pale);}
+.stat-card.highlight .stat-label{color:var(--brand-dark);}
+.stat-card.highlight .stat-value{color:var(--brand-dark);}
+
+/* ── PIPELINE ── */
+.pipeline-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:20px;}
+.pipeline-stage{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px;}
+.stage-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+.stage-name{font-size:10px;font-weight:700;color:var(--text-2);text-transform:uppercase;letter-spacing:.05em;}
+.stage-count{font-size:22px;font-weight:700;}
+.stage-count.new-lead{color:var(--blue);}
+.stage-count.contacted{color:var(--gold);}
+.stage-count.in-progress{color:var(--purple);}
+.stage-count.won{color:var(--brand);}
+.stage-count.lost{color:var(--red);}
+.stage-bar{height:4px;border-radius:2px;background:var(--surface-2);overflow:hidden;margin-bottom:8px;}
+.stage-bar-fill{height:100%;border-radius:2px;transition:width .4s;}
+.stage-leads{display:flex;flex-direction:column;gap:3px;max-height:120px;overflow-y:auto;}
+.stage-lead{font-size:11px;color:var(--text-2);padding:4px 6px;background:var(--surface-2);border-radius:4px;cursor:pointer;transition:background .12s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.stage-lead:hover{background:var(--brand-pale);color:var(--brand-dark);}
+
+/* ── FILTER ROW ── */
+.filter-row{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;align-items:center;}
+.filter-pill{padding:5px 12px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--text-2);font-size:11px;cursor:pointer;transition:all .15s;font-weight:500;}
+.filter-pill.active,.filter-pill:hover{background:var(--brand);color:#fff;border-color:var(--brand);}
+.filter-spacer{flex:1;}
+.search-input{padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-size:12px;outline:none;background:var(--surface);color:var(--text-1);width:200px;font-family:inherit;}
+.search-input:focus{border-color:var(--brand);}
+
+/* ── LEAD TABLE ── */
+.section-title{font-size:13px;font-weight:700;color:var(--text-1);margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;}
+.lead-table{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:20px;}
+.lead-table-header{display:grid;grid-template-columns:2fr 1.2fr 1fr 1fr 1fr 90px;gap:8px;padding:10px 14px;background:var(--surface-2);font-size:10px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border);}
+.lead-row{display:grid;grid-template-columns:2fr 1.2fr 1fr 1fr 1fr 90px;gap:8px;padding:10px 14px;border-bottom:1px solid var(--border);align-items:center;transition:background .12s;cursor:pointer;}
+.lead-row:last-child{border-bottom:none;}
+.lead-row:hover{background:var(--surface-2);}
+.lead-name{font-weight:600;color:var(--text-1);font-size:12px;}
+.lead-topics{font-size:10px;color:var(--text-3);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.stage-pill{font-size:10px;font-weight:600;padding:2px 8px;border-radius:10px;display:inline-block;white-space:nowrap;}
+.stage-pill.new-lead{background:var(--blue-pale);color:var(--blue);}
+.stage-pill.contacted{background:var(--gold-pale);color:var(--gold);}
+.stage-pill.in-progress{background:var(--purple-pale);color:var(--purple);}
+.stage-pill.won{background:var(--brand-pale);color:var(--brand-dark);}
+.stage-pill.lost{background:var(--red-pale);color:var(--red);}
+.btn-sm{padding:4px 10px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--text-2);font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s;}
+.btn-sm:hover{background:var(--brand);color:#fff;border-color:var(--brand);}
+
+/* ── MORNING BRIEF ── */
+.brief-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;}
+.brief-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px;}
+.brief-card.highlight{border-color:var(--brand);background:var(--brand-pale);}
+.brief-card.highlight .stat-label{color:var(--brand-dark);}
+.brief-card.highlight .stat-value{color:var(--brand-dark);}
+.priorities-wrap{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;}
+.priority-item{display:flex;align-items:flex-start;gap:10px;padding:12px 14px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .12s;}
+.priority-item:last-child{border-bottom:none;}
+.priority-item:hover{background:var(--surface-2);}
+.priority-item.done{opacity:.45;}
+.priority-item.done .priority-text{text-decoration:line-through;color:var(--text-3);}
+.p-check{width:18px;height:18px;border-radius:50%;border:2px solid var(--border-strong);background:transparent;cursor:pointer;flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;transition:all .15s;font-size:10px;color:#fff;}
+.priority-item.done .p-check{background:var(--brand);border-color:var(--brand);}
+.priority-icon{font-size:15px;flex-shrink:0;margin-top:1px;}
+.priority-body{flex:1;min-width:0;}
+.priority-text{font-size:13px;color:var(--text-1);font-weight:500;}
+.priority-sub{font-size:11px;color:var(--text-3);margin-top:2px;}
+.priority-open{font-size:11px;color:var(--brand);font-weight:600;white-space:nowrap;margin-top:2px;cursor:pointer;}
+
+/* ── MODAL ── */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:100;align-items:center;justify-content:center;}
+.modal-overlay.open{display:flex;}
+.modal-box{background:var(--surface);border-radius:14px;padding:24px;width:560px;max-width:95vw;max-height:88vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.2);}
+.modal-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;}
+.modal-title{font-size:16px;font-weight:700;color:var(--text-1);}
+.modal-sub{font-size:11px;color:var(--text-3);margin-top:2px;}
+.modal-close{background:none;border:none;font-size:20px;cursor:pointer;color:var(--text-3);line-height:1;padding:2px;}
+.modal-close:hover{color:var(--text-1);}
+.modal-section{margin-bottom:16px;}
+.modal-section-title{font-size:11px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;}
+.summary-box{background:var(--surface-2);border-radius:8px;padding:12px;font-size:12px;color:var(--text-2);line-height:1.7;max-height:160px;overflow-y:auto;white-space:pre-wrap;}
+.topics-wrap{display:flex;flex-wrap:wrap;gap:4px;}
+.topic-pill{font-size:11px;padding:2px 10px;background:var(--brand-pale);color:var(--brand-dark);border-radius:20px;font-weight:500;}
+.stage-select{padding:7px 10px;border:1px solid var(--border);border-radius:6px;font-size:12px;background:var(--surface);color:var(--text-1);outline:none;font-family:inherit;cursor:pointer;}
+.stage-select:focus{border-color:var(--brand);}
+.notes-list{display:flex;flex-direction:column;gap:6px;margin-bottom:10px;max-height:120px;overflow-y:auto;}
+.note-item{background:var(--surface-2);border-radius:6px;padding:8px 10px;}
+.note-text{font-size:12px;color:var(--text-1);line-height:1.5;}
+.note-meta{font-size:10px;color:var(--text-3);margin-top:3px;}
+.note-input-row{display:flex;gap:6px;}
+.note-input{flex:1;padding:8px 10px;border:1px solid var(--border);border-radius:6px;font-size:12px;background:var(--surface);color:var(--text-1);outline:none;font-family:inherit;}
+.note-input:focus{border-color:var(--brand);}
+.btn-primary{padding:7px 14px;background:var(--brand);color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;transition:background .15s;}
+.btn-primary:hover{background:var(--brand-hover);}
+.btn-ghost{padding:7px 14px;background:transparent;color:var(--text-2);border:1px solid var(--border);border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s;}
+.btn-ghost:hover{background:var(--surface-2);}
+.modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:16px;padding-top:16px;border-top:1px solid var(--border);}
+
+/* ── AI CHAT PANEL ── */
+.chat-panel{background:var(--surface);border:1px solid var(--border);border-radius:10px;display:flex;flex-direction:column;height:520px;}
+.chat-panel-header{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;}
+.chat-panel-title{font-size:13px;font-weight:700;color:var(--text-1);}
+.chat-panel-sub{font-size:11px;color:var(--text-3);}
+.chat-context-select{margin-left:auto;padding:5px 8px;border:1px solid var(--border);border-radius:6px;font-size:11px;background:var(--surface);color:var(--text-1);outline:none;font-family:inherit;max-width:180px;}
+.chat-messages{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px;}
+.chat-messages::-webkit-scrollbar{width:3px;}
+.chat-messages::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+.chat-msg{display:flex;gap:8px;max-width:90%;}
+.chat-msg.user{align-self:flex-end;flex-direction:row-reverse;}
+.chat-avatar{width:28px;height:28px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;}
+.chat-avatar.ai{background:var(--brand);color:#fff;}
+.chat-avatar.user{background:var(--surface-2);color:var(--text-2);}
+.chat-bubble{padding:8px 12px;border-radius:10px;font-size:12px;line-height:1.6;max-width:420px;}
+.chat-bubble.ai{background:var(--surface-2);color:var(--text-1);}
+.chat-bubble.user{background:var(--brand);color:#fff;}
+.chat-bubble p{margin:0;}
+.chat-typing{display:flex;align-items:center;gap:4px;padding:8px 12px;background:var(--surface-2);border-radius:10px;width:fit-content;}
+.tdot{width:5px;height:5px;background:var(--text-3);border-radius:50%;animation:tdot 1.2s infinite;}
+.tdot:nth-child(2){animation-delay:.2s;}.tdot:nth-child(3){animation-delay:.4s;}
+@keyframes tdot{0%,60%,100%{transform:translateY(0);opacity:.4;}30%{transform:translateY(-4px);opacity:1;}}
+.chat-input-row{padding:12px 14px;border-top:1px solid var(--border);display:flex;gap:6px;}
+.chat-text-input{flex:1;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:12px;background:var(--surface-2);color:var(--text-1);outline:none;font-family:inherit;resize:none;min-height:36px;max-height:80px;line-height:1.5;}
+.chat-text-input:focus{border-color:var(--brand);}
+.chat-send-btn{width:36px;height:36px;background:var(--brand);color:#fff;border:none;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.chat-send-btn:hover{background:var(--brand-hover);}
+.chat-send-btn svg{width:15px;height:15px;}
+
+/* ── EMPTY STATE ── */
+.empty-state{text-align:center;padding:48px 20px;color:var(--text-3);}
+.empty-icon{font-size:36px;margin-bottom:10px;}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:20px;right:20px;background:#0f172a;color:#fff;padding:10px 18px;border-radius:8px;font-size:12px;font-weight:500;z-index:999;opacity:0;transform:translateY(10px);transition:all .25s;pointer-events:none;}
+.toast.show{opacity:1;transform:translateY(0);}
+
+/* ── FOOTER ── */
+.footer{background:var(--surface);border-top:1px solid var(--border);padding:8px 20px;font-size:11px;color:var(--text-3);display:flex;justify-content:space-between;flex-shrink:0;}
+.footer strong{color:var(--text-2);}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="login-screen" id="loginScreen">
+  <div class="login-card">
+    <div class="login-logo">🏦</div>
+    <div class="login-title">NYFTY Command Center</div>
+    <div class="login-sub">Senior Loan Officer Access</div>
+    <input class="login-input" type="password" id="loginPass" placeholder="Enter password" />
+    <button class="login-btn" onclick="doLogin()">Sign In</button>
+    <div class="login-err hidden" id="loginErr">Invalid password</div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="appShell" class="hidden" style="display:none;flex-direction:column;height:100vh;">
+
+<div class="header">
+  <div class="brand">
+    <div class="brand-icon">🏦</div>
+    <div>
+      <div class="brand-name">NYFTY Lending</div>
+      <div class="brand-sub">Command Center</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="live-badge"><div class="live-dot"></div>Live</div>
+    <div class="header-time" id="headerTime"></div>
+    <button class="theme-toggle" onclick="toggleTheme()" title="Toggle dark mode"></button>
+  </div>
+</div>
+
+<div class="app">
+  <div class="sidebar">
+    <div class="sidebar-section">Navigation</div>
+    <div class="nav-item active" id="nav-dashboard" onclick="showModule('dashboard')">
+      <span class="nav-icon">📊</span> Dashboard
+    </div>
+    <div class="nav-item" id="nav-pipeline" onclick="showModule('pipeline')">
+      <span class="nav-icon">🔄</span> Pipeline
+      <span class="nav-badge green" id="navBadgePipeline">0</span>
+    </div>
+    <div class="nav-item" id="nav-leads" onclick="showModule('leads')">
+      <span class="nav-icon">👥</span> All Leads
+      <span class="nav-badge" id="navBadgeLeads">0</span>
+    </div>
+    <div class="nav-item" id="nav-brief" onclick="showModule('brief')">
+      <span class="nav-icon">☀️</span> Morning Brief
+    </div>
+    <div class="sidebar-divider"></div>
+    <div class="nav-item" id="nav-chat" onclick="showModule('chat')">
+      <span class="nav-icon">🤖</span> Ask Jordan
+    </div>
+    <div class="sidebar-divider"></div>
+    <div class="sidebar-agent">
+      <div class="sidebar-agent-label">Chat Agent</div>
+      <div class="sidebar-agent-url">nyfty-lending-agent.onrender.com</div>
+    </div>
+  </div>
+
+  <div class="main">
+
+    <!-- DASHBOARD -->
+    <div class="module active" id="module-dashboard">
+      <div class="page-header">
+        <div class="page-title">Dashboard</div>
+        <div class="page-sub" id="dashDate">Loading...</div>
+      </div>
+      <div class="stat-grid" id="statGrid">
+        <div class="stat-card"><div class="stat-label">Total Leads</div><div class="stat-value" id="s-total">—</div></div>
+        <div class="stat-card highlight"><div class="stat-label">New Leads</div><div class="stat-value" id="s-new">—</div></div>
+        <div class="stat-card"><div class="stat-label">In Progress</div><div class="stat-value" id="s-inprog">—</div></div>
+        <div class="stat-card"><div class="stat-label">Closed Won</div><div class="stat-value" id="s-won">—</div></div>
+        <div class="stat-card"><div class="stat-label">Chat Sessions</div><div class="stat-value" id="s-chats">—</div></div>
+      </div>
+      <div class="section-title">Recent Leads</div>
+      <div class="lead-table">
+        <div class="lead-table-header">
+          <div>Borrower</div><div>Stage</div><div>Topics</div><div>Messages</div><div>Date</div><div>Action</div>
+        </div>
+        <div id="dashLeads"><div class="empty-state"><div class="empty-icon">📭</div>Loading leads...</div></div>
+      </div>
+    </div>
+
+    <!-- PIPELINE -->
+    <div class="module" id="module-pipeline">
+      <div class="page-header">
+        <div class="page-title">Pipeline</div>
+        <div class="page-sub">Drag leads through stages by opening their record</div>
+      </div>
+      <div class="pipeline-grid" id="pipelineGrid">
+        <div class="pipeline-stage"><div class="stage-header"><span class="stage-name">New Lead</span><span class="stage-count new-lead" id="pc-new">0</span></div><div class="stage-bar"><div class="stage-bar-fill" id="pb-new" style="background:var(--blue);width:0%"></div></div><div class="stage-leads" id="pl-new"></div></div>
+        <div class="pipeline-stage"><div class="stage-header"><span class="stage-name">Contacted</span><span class="stage-count contacted" id="pc-cont">0</span></div><div class="stage-bar"><div class="stage-bar-fill" id="pb-cont" style="background:var(--gold);width:0%"></div></div><div class="stage-leads" id="pl-cont"></div></div>
+        <div class="pipeline-stage"><div class="stage-header"><span class="stage-name">In Progress</span><span class="stage-count in-progress" id="pc-prog">0</span></div><div class="stage-bar"><div class="stage-bar-fill" id="pb-prog" style="background:var(--purple);width:0%"></div></div><div class="stage-leads" id="pl-prog"></div></div>
+        <div class="pipeline-stage"><div class="stage-header"><span class="stage-name">Closed Won</span><span class="stage-count won" id="pc-won">0</span></div><div class="stage-bar"><div class="stage-bar-fill" id="pb-won" style="background:var(--brand);width:0%"></div></div><div class="stage-leads" id="pl-won"></div></div>
+        <div class="pipeline-stage"><div class="stage-header"><span class="stage-name">Closed Lost</span><span class="stage-count lost" id="pc-lost">0</span></div><div class="stage-bar"><div class="stage-bar-fill" id="pb-lost" style="background:var(--red);width:0%"></div></div><div class="stage-leads" id="pl-lost"></div></div>
+      </div>
+    </div>
+
+    <!-- ALL LEADS -->
+    <div class="module" id="module-leads">
+      <div class="page-header">
+        <div class="page-title">All Leads</div>
+        <div class="page-sub">Every handoff from Jordan</div>
+      </div>
+      <div class="filter-row">
+        <button class="filter-pill active" onclick="filterLeads('all',this)">All</button>
+        <button class="filter-pill" onclick="filterLeads('New Lead',this)">New</button>
+        <button class="filter-pill" onclick="filterLeads('Contacted',this)">Contacted</button>
+        <button class="filter-pill" onclick="filterLeads('In Progress',this)">In Progress</button>
+        <button class="filter-pill" onclick="filterLeads('Closed Won',this)">Won</button>
+        <button class="filter-pill" onclick="filterLeads('Closed Lost',this)">Lost</button>
+        <div class="filter-spacer"></div>
+        <input class="search-input" id="leadsSearch" placeholder="Search borrower..." oninput="renderLeadsTable()" />
+      </div>
+      <div class="lead-table">
+        <div class="lead-table-header">
+          <div>Borrower</div><div>Stage</div><div>Topics</div><div>Messages</div><div>Date</div><div>Action</div>
+        </div>
+        <div id="leadsTableBody"><div class="empty-state"><div class="empty-icon">📭</div>Loading...</div></div>
+      </div>
+    </div>
+
+    <!-- MORNING BRIEF -->
+    <div class="module" id="module-brief">
+      <div class="page-header">
+        <div class="page-title">Morning Brief</div>
+        <div class="page-sub" id="briefDate">Today's priorities</div>
+      </div>
+      <div class="brief-grid" id="briefStats"></div>
+      <div class="section-title">Today's Priorities</div>
+      <div class="priorities-wrap" id="prioritiesWrap">
+        <div class="empty-state"><div class="empty-icon">☀️</div>Loading brief...</div>
+      </div>
+    </div>
+
+    <!-- ASK JORDAN -->
+    <div class="module" id="module-chat">
+      <div class="page-header">
+        <div class="page-title">Ask Jordan</div>
+        <div class="page-sub">Ask about any lead, loan program, or next steps</div>
+      </div>
+      <div class="chat-panel">
+        <div class="chat-panel-header">
+          <div class="chat-avatar ai" style="width:28px;height:28px;font-size:12px;">J</div>
+          <div>
+            <div class="chat-panel-title">Jordan — NYFTY AI</div>
+            <div class="chat-panel-sub">Loan Specialist</div>
+          </div>
+          <select class="chat-context-select" id="chatContextSelect">
+            <option value="">No contact context</option>
+          </select>
+        </div>
+        <div class="chat-messages" id="ccChatMessages">
+          <div class="chat-msg">
+            <div class="chat-avatar ai">J</div>
+            <div class="chat-bubble ai"><p>Hi! I'm Jordan. Select a contact from the dropdown to discuss their situation, or ask me anything about NYFTY loan programs, follow-up strategies, or how to move a lead forward.</p></div>
+          </div>
+        </div>
+        <div class="chat-input-row">
+          <textarea class="chat-text-input" id="ccChatInput" placeholder="Ask Jordan about a lead or loan program..." rows="1"></textarea>
+          <button class="chat-send-btn" onclick="sendCCChat()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /main -->
+</div><!-- /app -->
+
+<div class="footer">
+  <span>Produced by <strong>The Way Marketing</strong> — All Rights Reserved 2026</span>
+  <span id="footerStatus">Connecting...</span>
+</div>
+
+</div><!-- /appShell -->
+
+<!-- CONTACT MODAL -->
+<div class="modal-overlay" id="contactModal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" id="modalName">—</div>
+        <div class="modal-sub" id="modalMeta">—</div>
+      </div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-section">
+      <div class="modal-section-title">Stage</div>
+      <select class="stage-select" id="modalStage" onchange="updateStage()">
+        <option>New Lead</option>
+        <option>Contacted</option>
+        <option>In Progress</option>
+        <option>Closed Won</option>
+        <option>Closed Lost</option>
+      </select>
+    </div>
+    <div class="modal-section" id="modalTopicsSection">
+      <div class="modal-section-title">Topics Discussed</div>
+      <div class="topics-wrap" id="modalTopics"></div>
+    </div>
+    <div class="modal-section">
+      <div class="modal-section-title">AI Summary</div>
+      <div class="summary-box" id="modalSummary">No summary available.</div>
+    </div>
+    <div class="modal-section">
+      <div class="modal-section-title">Notes</div>
+      <div class="notes-list" id="modalNotes"></div>
+      <div class="note-input-row">
+        <input class="note-input" id="noteInput" placeholder="Add a note..." />
+        <button class="btn-primary" onclick="addNote()">Add</button>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-ghost" onclick="closeModal()">Close</button>
+      <button class="btn-primary" onclick="openChatWithContact()">Ask Jordan about this lead →</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── State ──────────────────────────────────────────────────────────────────────
+var allRecords = [];
+var filteredRecords = [];
+var activeFilter = 'all';
+var currentContact = null;
+var ccChatHistory = [];
+var isTyping = false;
+
+// ── Auth ───────────────────────────────────────────────────────────────────────
+function doLogin() {
+  var pass = document.getElementById('loginPass').value;
+  fetch('/api/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ password: pass })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(d) {
+    if (d.ok) {
+      document.getElementById('loginScreen').style.display = 'none';
+      var app = document.getElementById('appShell');
+      app.classList.remove('hidden');
+      app.style.display = 'flex';
+      initApp();
+    } else {
+      document.getElementById('loginErr').classList.remove('hidden');
+    }
+  })
+  .catch(function() { document.getElementById('loginErr').classList.remove('hidden'); });
+}
+document.getElementById('loginPass').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') doLogin();
+});
+
+// ── Theme ──────────────────────────────────────────────────────────────────────
+function toggleTheme() {
+  var r = document.documentElement;
+  r.classList.toggle('dark');
+  try { localStorage.setItem('nyfty-cc-theme', r.classList.contains('dark') ? 'dark' : 'light'); } catch(e) {}
+}
+(function() {
+  try {
+    var t = localStorage.getItem('nyfty-cc-theme');
+    if (t === 'dark') document.documentElement.classList.add('dark');
+    else if (!t && window.matchMedia('(prefers-color-scheme: dark)').matches) document.documentElement.classList.add('dark');
+  } catch(e) {}
+})();
+
+// ── Clock ──────────────────────────────────────────────────────────────────────
+function updateClock() {
+  document.getElementById('headerTime').textContent = new Date().toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' });
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// ── Module nav ─────────────────────────────────────────────────────────────────
+function showModule(name) {
+  document.querySelectorAll('.module').forEach(function(m) { m.classList.remove('active'); });
+  document.querySelectorAll('.nav-item').forEach(function(n) { n.classList.remove('active'); });
+  document.getElementById('module-' + name).classList.add('active');
+  document.getElementById('nav-' + name).classList.add('active');
+  if (name === 'brief') loadBrief();
+  if (name === 'pipeline') renderPipeline();
+  if (name === 'leads') renderLeadsTable();
+  if (name === 'dashboard') renderDashboard();
+}
+
+// ── Init ───────────────────────────────────────────────────────────────────────
+function initApp() {
+  document.getElementById('dashDate').textContent = new Date().toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric', year:'numeric' });
+  loadData();
+  setInterval(loadData, 60000);
+}
+
+function loadData() {
+  Promise.all([
+    fetch('/api/crm').then(function(r) { return r.json(); }),
+    fetch('/api/stats').then(function(r) { return r.json(); })
+  ])
+  .then(function(results) {
+    allRecords = results[0];
+    var stats  = results[1];
+    filteredRecords = allRecords.slice();
+    updateStats(stats);
+    renderDashboard();
+    renderPipeline();
+    populateChatContextSelect();
+    document.getElementById('footerStatus').textContent = 'Last updated ' + new Date().toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' });
+    document.getElementById('navBadgeLeads').textContent  = allRecords.length;
+    document.getElementById('navBadgePipeline').textContent = (stats.newLeads || 0);
+  })
+  .catch(function(e) {
+    document.getElementById('footerStatus').textContent = 'Agent unreachable — ' + e.message;
+  });
+}
+
+// ── Stats ──────────────────────────────────────────────────────────────────────
+function updateStats(s) {
+  document.getElementById('s-total').textContent  = s.totalLeads  || 0;
+  document.getElementById('s-new').textContent    = s.newLeads    || 0;
+  document.getElementById('s-inprog').textContent = s.inProgress  || 0;
+  document.getElementById('s-won').textContent    = s.closedWon   || 0;
+  document.getElementById('s-chats').textContent  = s.totalChats  || 0;
+}
+
+// ── Dashboard ──────────────────────────────────────────────────────────────────
+function renderDashboard() {
+  var recent = allRecords.slice().sort(function(a,b) { return new Date(b.createdAt) - new Date(a.createdAt); }).slice(0,8);
+  var el = document.getElementById('dashLeads');
+  if (!recent.length) { el.innerHTML = '<div class="empty-state"><div class="empty-icon">📭</div>No leads yet — handoffs from Jordan will appear here.</div>'; return; }
+  el.innerHTML = recent.map(function(r) { return leadRow(r); }).join('');
+}
+
+// ── Pipeline ───────────────────────────────────────────────────────────────────
+function renderPipeline() {
+  var stages = ['New Lead','Contacted','In Progress','Closed Won','Closed Lost'];
+  var ids    = ['new','cont','prog','won','lost'];
+  var total  = allRecords.length || 1;
+  stages.forEach(function(s, i) {
+    var leads = allRecords.filter(function(r) { return r.stage === s; });
+    document.getElementById('pc-' + ids[i]).textContent = leads.length;
+    document.getElementById('pb-' + ids[i]).style.width = Math.round((leads.length / total) * 100) + '%';
+    var el = document.getElementById('pl-' + ids[i]);
+    el.innerHTML = leads.length
+      ? leads.slice(0,6).map(function(r) {
+          return '<div class="stage-lead" onclick="openContact(\'' + r.id + '\')">' + esc(r.borrowerName || 'Unknown') + '</div>';
+        }).join('')
+      : '<div style="font-size:11px;color:var(--text-3);padding:4px 6px;">Empty</div>';
+  });
+}
+
+// ── Leads Table ────────────────────────────────────────────────────────────────
+function filterLeads(stage, btn) {
+  activeFilter = stage;
+  document.querySelectorAll('.filter-pill').forEach(function(p) { p.classList.remove('active'); });
+  btn.classList.add('active');
+  renderLeadsTable();
+}
+
+function renderLeadsTable() {
+  var search = (document.getElementById('leadsSearch').value || '').toLowerCase();
+  var rows = allRecords.filter(function(r) {
+    var stageOk = activeFilter === 'all' || r.stage === activeFilter;
+    var searchOk = !search || (r.borrowerName || '').toLowerCase().includes(search) || (r.summary || '').toLowerCase().includes(search);
+    return stageOk && searchOk;
+  }).sort(function(a,b) { return new Date(b.createdAt) - new Date(a.createdAt); });
+  var el = document.getElementById('leadsTableBody');
+  el.innerHTML = rows.length ? rows.map(function(r) { return leadRow(r); }).join('') : '<div class="empty-state"><div class="empty-icon">🔍</div>No leads match this filter.</div>';
+}
+
+function leadRow(r) {
+  var sc = stagePillClass(r.stage);
+  var topics = (r.topics || []).slice(0,3).join(', ') || '—';
+  var date   = r.createdAt ? new Date(r.createdAt).toLocaleDateString() : '—';
+  return '<div class="lead-row" onclick="openContact(\'' + r.id + '\')">' +
+    '<div><div class="lead-name">' + esc(r.borrowerName || 'Unknown Borrower') + '</div><div class="lead-topics">' + esc(topics) + '</div></div>' +
+    '<div><span class="stage-pill ' + sc + '">' + esc(r.stage) + '</span></div>' +
+    '<div style="font-size:11px;color:var(--text-2);">' + esc((r.topics||[]).length ? r.topics[0] : '—') + '</div>' +
+    '<div style="font-size:12px;color:var(--text-2);">' + (r.messageCount || 0) + '</div>' +
+    '<div style="font-size:11px;color:var(--text-3);">' + date + '</div>' +
+    '<div><button class="btn-sm" onclick="event.stopPropagation();openContact(\'' + r.id + '\')">Open</button></div>' +
+    '</div>';
+}
+
+function stagePillClass(s) {
+  var map = { 'New Lead':'new-lead','Contacted':'contacted','In Progress':'in-progress','Closed Won':'won','Closed Lost':'lost' };
+  return map[s] || 'new-lead';
+}
+
+// ── Contact Modal ──────────────────────────────────────────────────────────────
+function openContact(id) {
+  var r = allRecords.find(function(x) { return x.id === id; });
+  if (!r) return;
+  currentContact = r;
+  document.getElementById('modalName').textContent    = r.borrowerName || 'Unknown Borrower';
+  document.getElementById('modalMeta').textContent    = r.conversationId + ' · ' + (r.messageCount||0) + ' messages · ' + (r.createdAt ? new Date(r.createdAt).toLocaleString() : '—');
+  document.getElementById('modalStage').value         = r.stage || 'New Lead';
+  document.getElementById('modalSummary').textContent = r.summary || 'No summary available.';
+  var topicsEl = document.getElementById('modalTopics');
+  topicsEl.innerHTML = (r.topics||[]).length
+    ? r.topics.map(function(t) { return '<span class="topic-pill">' + esc(t) + '</span>'; }).join('')
+    : '<span style="font-size:12px;color:var(--text-3);">None detected</span>';
+  renderModalNotes(r.notes || []);
+  document.getElementById('contactModal').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('contactModal').classList.remove('open');
+  currentContact = null;
+}
+
+function renderModalNotes(notes) {
+  var el = document.getElementById('modalNotes');
+  el.innerHTML = notes.length
+    ? notes.map(function(n) {
+        return '<div class="note-item"><div class="note-text">' + esc(n.text) + '</div><div class="note-meta">' + esc(n.author) + ' · ' + new Date(n.createdAt).toLocaleString() + '</div></div>';
+      }).join('')
+    : '<div style="font-size:12px;color:var(--text-3);">No notes yet.</div>';
+}
+
+function updateStage() {
+  if (!currentContact) return;
+  var stage = document.getElementById('modalStage').value;
+  fetch('/api/stage', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ id: currentContact.id, stage: stage })
+  })
+  .then(function() {
+    currentContact.stage = stage;
+    var rec = allRecords.find(function(r) { return r.id === currentContact.id; });
+    if (rec) rec.stage = stage;
+    renderPipeline();
+    renderLeadsTable();
+    showToast('Stage updated to ' + stage);
+  })
+  .catch(function() { showToast('Error updating stage'); });
+}
+
+function addNote() {
+  if (!currentContact) return;
+  var text = document.getElementById('noteInput').value.trim();
+  if (!text) return;
+  fetch('/api/note', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ id: currentContact.id, text: text, author: 'Loan Officer' })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(d) {
+    document.getElementById('noteInput').value = '';
+    var rec = allRecords.find(function(r) { return r.id === currentContact.id; });
+    if (rec) rec.notes = d.notes;
+    currentContact.notes = d.notes;
+    renderModalNotes(d.notes);
+    showToast('Note added');
+  })
+  .catch(function() { showToast('Error adding note'); });
+}
+
+function openChatWithContact() {
+  closeModal();
+  showModule('chat');
+  if (currentContact) {
+    var sel = document.getElementById('chatContextSelect');
+    sel.value = currentContact.id;
+    appendCCMsg('assistant', 'I\'ve loaded the context for ' + (currentContact.borrowerName || 'this borrower') + '. What would you like to know?');
+  }
+}
+
+// ── Chat Context Select ────────────────────────────────────────────────────────
+function populateChatContextSelect() {
+  var sel = document.getElementById('chatContextSelect');
+  var current = sel.value;
+  sel.innerHTML = '<option value="">No contact context</option>';
+  allRecords.forEach(function(r) {
+    var opt = document.createElement('option');
+    opt.value = r.id;
+    opt.textContent = (r.borrowerName || 'Unknown') + ' — ' + r.stage;
+    sel.appendChild(opt);
+  });
+  if (current) sel.value = current;
+}
+
+// ── CC Chat ────────────────────────────────────────────────────────────────────
+function sendCCChat() {
+  var input = document.getElementById('ccChatInput');
+  var msg   = input.value.trim();
+  if (!msg || isTyping) return;
+  var contactId = document.getElementById('chatContextSelect').value;
+  input.value = '';
+  input.style.height = 'auto';
+  appendCCMsg('user', msg);
+  showCCTyping();
+  isTyping = true;
+  fetch('/api/chat', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ message: msg, contactId: contactId || null, history: ccChatHistory })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(d) {
+    hideCCTyping();
+    isTyping = false;
+    var reply = d.response || d.error || 'Error';
+    appendCCMsg('assistant', reply);
+    ccChatHistory.push({ role: 'user', content: msg });
+    ccChatHistory.push({ role: 'assistant', content: reply });
+    if (ccChatHistory.length > 20) ccChatHistory = ccChatHistory.slice(-20);
+  })
+  .catch(function(e) {
+    hideCCTyping();
+    isTyping = false;
+    appendCCMsg('assistant', 'Connection error: ' + e.message);
+  });
+}
+
+function appendCCMsg(role, text) {
+  var msgs = document.getElementById('ccChatMessages');
+  var row  = document.createElement('div');
+  row.className = 'chat-msg' + (role === 'user' ? ' user' : '');
+  var av  = document.createElement('div');
+  av.className = 'chat-avatar ' + (role === 'user' ? 'user' : 'ai');
+  av.textContent = role === 'user' ? '👤' : 'J';
+  var bub = document.createElement('div');
+  bub.className = 'chat-bubble ' + (role === 'user' ? 'user' : 'ai');
+  bub.innerHTML = '<p>' + esc(text).replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>') + '</p>';
+  row.appendChild(av); row.appendChild(bub);
+  msgs.appendChild(row);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function showCCTyping() {
+  var msgs = document.getElementById('ccChatMessages');
+  var row  = document.createElement('div');
+  row.className = 'chat-msg'; row.id = 'ccTyping';
+  var av  = document.createElement('div'); av.className = 'chat-avatar ai'; av.textContent = 'J';
+  var bub = document.createElement('div'); bub.className = 'chat-typing';
+  bub.innerHTML = '<div class="tdot"></div><div class="tdot"></div><div class="tdot"></div>';
+  row.appendChild(av); row.appendChild(bub);
+  msgs.appendChild(row); msgs.scrollTop = msgs.scrollHeight;
+}
+function hideCCTyping() { var e = document.getElementById('ccTyping'); if (e) e.remove(); }
+
+// ── Morning Brief ──────────────────────────────────────────────────────────────
+function loadBrief() {
+  fetch('/api/brief').then(function(r) { return r.json(); }).then(function(d) {
+    document.getElementById('briefDate').textContent = d.date || '';
+    document.getElementById('briefStats').innerHTML = [
+      '<div class="brief-card highlight"><div class="stat-label">New Leads</div><div class="stat-value">' + d.totalNew + '</div><div class="stat-sub">Need first contact</div></div>',
+      '<div class="brief-card"><div class="stat-label">Active</div><div class="stat-value">' + d.totalActive + '</div><div class="stat-sub">Contacted + In Progress</div></div>',
+      '<div class="brief-card"><div class="stat-label">Priorities</div><div class="stat-value">' + (d.priorities||[]).length + '</div><div class="stat-sub">Action items today</div></div>'
+    ].join('');
+    var pw = document.getElementById('prioritiesWrap');
+    if (!d.priorities || !d.priorities.length) {
+      pw.innerHTML = '<div class="empty-state"><div class="empty-icon">✅</div>All caught up! No pending priorities.</div>';
+      return;
+    }
+    pw.innerHTML = d.priorities.map(function(p, i) {
+      return '<div class="priority-item" id="pri-' + i + '">' +
+        '<div class="p-check" onclick="togglePriority(' + i + ')"></div>' +
+        '<div class="priority-icon">' + p.icon + '</div>' +
+        '<div class="priority-body">' +
+          '<div class="priority-text">' + esc(p.text) + '</div>' +
+          '<div class="priority-sub">' + esc(p.sub) + '</div>' +
+          (p.id ? '<div class="priority-open" onclick="openContact(\'' + p.id + '\')">Open record →</div>' : '') +
+        '</div>' +
+        '</div>';
+    }).join('');
+  }).catch(function(e) {
+    document.getElementById('prioritiesWrap').innerHTML = '<div class="empty-state"><div class="empty-icon">⚠️</div>Could not load brief: ' + e.message + '</div>';
+  });
+}
+
+function togglePriority(i) {
+  var el = document.getElementById('pri-' + i);
+  el.classList.toggle('done');
+}
+
+// ── Helpers ────────────────────────────────────────────────────────────────────
+function esc(s) {
+  return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+function showToast(msg) {
+  var t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(function() { t.classList.remove('show'); }, 2800);
+}
+
+// ── Input auto-resize + Enter ──────────────────────────────────────────────────
+var ccInput = document.getElementById('ccChatInput');
+ccInput.addEventListener('input', function() {
+  this.style.height = 'auto';
+  this.style.height = Math.min(this.scrollHeight, 80) + 'px';
+});
+ccInput.addEventListener('keydown', function(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendCCChat(); }
+});
+
+// ── Close modal on overlay click ───────────────────────────────────────────────
+document.getElementById('contactModal').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+</script>
+</body>
+</html>

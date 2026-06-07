@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: nyfty-command-center
+    env: node
+    buildCommand: echo "No build needed"
+    startCommand: node server.js
+    envVars:
+      - key: NYFTY_AGENT_URL
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
